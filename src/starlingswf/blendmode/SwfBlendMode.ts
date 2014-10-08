@@ -13,10 +13,10 @@ module starlingswf{
             if(SwfBlendMode.modes[blendMode]){
                 display.blendMode = blendMode;
             }
+            else {
+                display.blendMode = "normal";
+            }
         }
 
     }
-
-
-
 }
