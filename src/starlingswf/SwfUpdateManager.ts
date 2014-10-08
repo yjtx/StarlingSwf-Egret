@@ -71,12 +71,21 @@ module starlingswf{
                 return;
             }
             this._currentTime -= this._fpsTime;
-            if(this._currentTime > this._fpsTime){
-                this._currentTime = 0;
+            this._update();
+
+            var jumpFlag:number = 0;
+            while(this._currentTime > this._fpsTime){
+                this._currentTime -= this._fpsTime;
+                jumpFlag++;
+                if(jumpFlag < 4){
+                    this._update();
+                }
             }
+        }
+
+        private _update():void{
             this.updateRemove();
             this.updateAdd();
-
             var len:number = this._animations.length;
             for(var i:number = 0; i < len; i++){
                 this._animations[i].update();

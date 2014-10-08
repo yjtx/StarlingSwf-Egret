@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class GameApp extends egret.DisplayObjectContainer{
+class Main extends egret.DisplayObjectContainer {
 
     /**
      * 加载进度界面
@@ -35,67 +35,70 @@ class GameApp extends egret.DisplayObjectContainer{
     public constructor() {
         super();
 
-        this.addEventListener(egret.Event.ADDED_TO_STAGE,this.onAddToStage,this);
+        egret.Injector.mapClass(RES.AnalyzerBase, starlingswf.StarlingSwfSheetAnalyzer, "starlingswf_sheet");
+
+        this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
     }
 
-    private onAddToStage(event:egret.Event){
+    private onAddToStage(event:egret.Event) {
         //设置加载进度界面
-        this.loadingView  = new LoadingUI();
+        this.loadingView = new LoadingUI();
         this.stage.addChild(this.loadingView);
 
         //初始化Resource资源加载库
-        RES.addEventListener(RES.ResourceEvent.CONFIG_COMPLETE,this.onConfigComp,this);
-        RES.loadConfig("resource/resource.json","resource/");
+        RES.addEventListener(RES.ResourceEvent.CONFIG_COMPLETE, this.onConfigComplete, this);
+        RES.loadConfig("resource/resource.json", "resource/");
     }
+
     /**
      * 配置文件加载完成,开始预加载preload资源组。
      */
-    private onConfigComp(event:RES.ResourceEvent):void{
-        RES.removeEventListener(RES.ResourceEvent.CONFIG_COMPLETE,this.onConfigComp,this);
-        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,this.onResourceLoadComplete,this);
-        RES.addEventListener(RES.ResourceEvent.GROUP_PROGRESS,this.onResourceProgress,this);
+    private onConfigComplete(event:RES.ResourceEvent):void {
+        RES.removeEventListener(RES.ResourceEvent.CONFIG_COMPLETE, this.onConfigComplete, this);
+        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.onResourceLoadComplete, this);
+        RES.addEventListener(RES.ResourceEvent.GROUP_PROGRESS, this.onResourceProgress, this);
         RES.loadGroup("preload");
     }
+
     /**
      * preload资源组加载完成
      */
     private onResourceLoadComplete(event:RES.ResourceEvent):void {
-        if(event.groupName=="preload"){
+        if (event.groupName == "preload") {
             this.stage.removeChild(this.loadingView);
-            RES.removeEventListener(RES.ResourceEvent.GROUP_COMPLETE,this.onResourceLoadComplete,this);
-            RES.removeEventListener(RES.ResourceEvent.GROUP_PROGRESS,this.onResourceProgress,this);
+            RES.removeEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.onResourceLoadComplete, this);
+            RES.removeEventListener(RES.ResourceEvent.GROUP_PROGRESS, this.onResourceProgress, this);
             this.createGameScene();
         }
     }
+
     /**
      * preload资源组加载进度
      */
     private onResourceProgress(event:RES.ResourceEvent):void {
-        if(event.groupName=="preload"){
-            this.loadingView.setProgress(event.itemsLoaded,event.itemsTotal);
+        if (event.groupName == "preload") {
+            this.loadingView.setProgress(event.itemsLoaded, event.itemsTotal);
         }
     }
 
     private swf:starlingswf.Swf;
+
     /**
      * 创建游戏场景
      */
-    private createGameScene():void{
+    private createGameScene():void {
         var swfData:Object = RES.getRes("test_swf");
         var spriteSheet:egret.SpriteSheet = RES.getRes("test");
 
         var assetsManager = new starlingswf.SwfAssetManager();
-        assetsManager.addSpriteSheet("test",spriteSheet);
+        assetsManager.addSpriteSheet("test", spriteSheet);
 
-        this.swf = new starlingswf.Swf(swfData,assetsManager,60);
+        this.swf = new starlingswf.Swf(swfData, assetsManager, 60);
 
-        this.test1();
-//        this.test2();
+//        this.test1();
+        this.test2();
 //        this.test3();
 //        this.test4();
-//        this.test5();
-
-        this.stage.addEventListener(egret.Event.RESIZE,this.onReSize,this);
 
         egret.Profiler.getInstance().run();
 
@@ -104,7 +107,7 @@ class GameApp extends egret.DisplayObjectContainer{
     /**
      * Sprite测试
      * */
-    private test1():void{
+    private test1():void {
         var sprite:starlingswf.SwfSprite = this.swf.createSprite("spr_1");
         this.addChild(sprite);
     }
@@ -112,7 +115,7 @@ class GameApp extends egret.DisplayObjectContainer{
     /**
      * MovieClip测试
      * */
-    private test2():void{
+    private test2():void {
 
         var mcNames:string[] = ["mc_lajiao","mc_test1","mc_Tain","mc_Zombie_balloon","mc_Zombie_dolphinrider","mc_Zombie_gargantuar","mc_Zombie_imp","mc_Zombie_jackbox","mc_Zombie_ladder","mc_Zombie_polevaulter"];
         for(var i:number = 0 ; i < 50 ; i++){
@@ -128,75 +131,40 @@ class GameApp extends egret.DisplayObjectContainer{
     /**
      * 动画事件测试
      * */
-    private test3():void{
+    private test3():void {
         var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_Tain");
         mc.x = 480 / 2;
         mc.y = 320 / 2;
-        mc.addEventListener(egret.Event.COMPLETE,this.mcComplete,mc);
+        mc.addEventListener(egret.Event.COMPLETE, this.mcComplete, mc);
         mc.gotoAndPlay("walk");
         this.addChild(mc);
+
+        var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_Tain");
+        mc.x = 480 / 2;
+        mc.y = 320;
+        mc.addEventListener(egret.Event.COMPLETE, this.mcComplete, mc);
+        mc.gotoAndPlay("walk");
+        this.addChild(mc);
+        mc.rewind = true;
     }
 
-    private mcComplete(e:egret.Event):void{
+    private mcComplete(e:egret.Event):void {
         console.log("mcComplete");
     }
 
     /**
      * 帧事件测试
      * */
-    private test4():void{
+    private test4():void {
         var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_frame_event");
-        mc.addEventListener("@out",this.frameEventOut,mc);
-        mc.addEventListener("@in",this.frameEventIn,mc);
+        mc.addEventListener(starlingswf.SwfEvent.SWF_FRAME, this.frameEventOut, this);
         this.addChild(mc);
     }
 
-    private frameEventOut(e:egret.Event):void{
-        console.log("@out");
+    private frameEventOut(e:starlingswf.SwfEvent):void {
+        console.log(e.type);
+        console.log(e.frames);
     }
-
-    private frameEventIn(e:egret.Event):void{
-        console.log("@in");
-    }
-
-    /**
-     * blendMode
-     * */
-    private test5(){
-        var spr:starlingswf.SwfSprite = this.swf.createSprite("spr_blendmode");
-        this.addChild(spr);
-    }
-
-
-    private onReSize(e:egret.Event){
-        console.log(this.stage.stageWidth);
-        console.log(this.stage.stageHeight);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
-
 

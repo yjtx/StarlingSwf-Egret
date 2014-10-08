@@ -39,26 +39,70 @@ module starlingswf{
 
         }
 
+        private _isRewind:boolean = false;//倒播
+        /**
+         * 设置动画是否倒播
+         * @param value
+         */
+        public set rewind(value:boolean) {
+            this._isRewind = value;
+        }
+
+        /**
+         * 自定义一个帧事件
+         * @param frameEvents {1 : ["a", "c"], 12 : ["b"]}
+         */
+        public addFrameEvents(frameEvents:Object):void {
+            for (var key in frameEvents) {
+                var events:string = "@" + frameEvents[key].join("@");
+                var frames:string = "";
+                if (this._frameEvents[key]) {
+                    frames = this._frameEvents[key];
+                }
+
+                frames += events;
+                this._frameEvents[key] = frames;
+            }
+        }
+
         public update():void {
             if (!this._isPlay) return;
 
-            if(this._currentFrame > this._endFrame){
+            if (this._isRewind) {//倒播
+                if(this._currentFrame < this._startFrame){
+                    var isReturn:boolean = false;
+                    if(!this.loop || this._startFrame == this._endFrame){//只有一帧就不要循环下去了
+                        if(this._ownerSwf) this.stop(false);
+                        isReturn = true;
+                    }
 
-                var isReturn:boolean = false;
+                    if(this._hasCompleteListener) this.dispatchEventWith(egret.Event.COMPLETE);
 
-                if(!this.loop || this._startFrame == this._endFrame){//只有一帧就不要循环下去了
-                    if(this._ownerSwf) this.stop(false);
-                    isReturn = true;
+                    if(isReturn) return;
+
+                    this.setCurrentFrame(this._endFrame);
+                }else{
+                    this.setCurrentFrame(this._currentFrame);
+                    this._currentFrame -= 1;
                 }
+            }
+            else {
+                if(this._currentFrame > this._endFrame){
+                    var isReturn:boolean = false;
+                    if(!this.loop || this._startFrame == this._endFrame){//只有一帧就不要循环下去了
+                        if(this._ownerSwf) this.stop(false);
+                        isReturn = true;
+                    }
 
-                if(this._hasCompleteListener) this.dispatchEventWith(egret.Event.COMPLETE);
+                    if(this._hasCompleteListener) this.dispatchEventWith(egret.Event.COMPLETE);
 
-                if(isReturn) return;
+                    if(isReturn) return;
 
-                this.setCurrentFrame(this._startFrame);
-            }else{
-                this.setCurrentFrame(this._currentFrame);
-                this._currentFrame += 1;
+                    this.setCurrentFrame(this._startFrame);
+                }else{
+                    this.setCurrentFrame(this._currentFrame);
+                    this._currentFrame += 1;
+                }
             }
         }
 
@@ -191,6 +235,17 @@ module starlingswf{
         }
 
         public gotoAndPlay(frame:Object):void{
+            this._isRewind = false;
+            this.goTo(frame);
+            this.play();
+        }
+
+        /**
+         * 倒播
+         * @param frame
+         */
+        public gotoAndRewind(frame:Object):void {
+            this._isRewind = true;
             this.goTo(frame);
             this.play();
         }
