@@ -87,17 +87,22 @@ class Main extends egret.DisplayObjectContainer {
      * 创建游戏场景
      */
     private createGameScene():void {
-        var swfData:Object = RES.getRes("test_swf");
-        var spriteSheet:egret.SpriteSheet = RES.getRes("test");
+        var bg:egret.Bitmap = new egret.Bitmap(RES.getRes("bg"));
+        bg.width = egret.MainContext.instance.stage.stageWidth;
+        bg.height = egret.MainContext.instance.stage.stageHeight;
+        this.addChild(bg);
+
+        var swfData:Object = RES.getRes("hero_200001_swf");
+        var spriteSheet:egret.SpriteSheet = RES.getRes("hero_200001");
 
         var assetsManager = new starlingswf.SwfAssetManager();
-        assetsManager.addSpriteSheet("test", spriteSheet);
+        assetsManager.addSpriteSheet("hero_200001", spriteSheet);
 
         this.swf = new starlingswf.Swf(swfData, assetsManager, 60);
 
 //        this.test1();
-        this.test2();
-//        this.test3();
+//        this.test2();
+        this.test3();
 //        this.test4();
 
         egret.Profiler.getInstance().run();
@@ -132,20 +137,25 @@ class Main extends egret.DisplayObjectContainer {
      * 动画事件测试
      * */
     private test3():void {
-        var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_Tain");
-        mc.x = 480 / 2;
-        mc.y = 320 / 2;
-        mc.addEventListener(egret.Event.COMPLETE, this.mcComplete, mc);
-        mc.gotoAndPlay("walk");
-        this.addChild(mc);
+//        var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_SkillGeneEffect_3");
+//        mc.x = 480 / 2;
+//        mc.y = 320 / 2;
+//        mc.addEventListener(egret.Event.COMPLETE, this.mcComplete, mc);
+////        mc.gotoAndPlay("walk");
+//        this.addChild(mc);
 
-        var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_Tain");
+        var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_hero_200001_attack");
         mc.x = 480 / 2;
         mc.y = 320;
         mc.addEventListener(egret.Event.COMPLETE, this.mcComplete, mc);
-        mc.gotoAndPlay("walk");
+        mc.addEventListener(starlingswf.SwfEvent.SWF_FRAME, this.onFrameHandler, this);
+//        mc.gotoAndPlay("walk");
         this.addChild(mc);
         mc.rewind = true;
+    }
+
+    private onFrameHandler(e:starlingswf.SwfEvent):void {
+        console.log(e.frames);
     }
 
     private mcComplete(e:egret.Event):void {
@@ -156,9 +166,15 @@ class Main extends egret.DisplayObjectContainer {
      * 帧事件测试
      * */
     private test4():void {
+//        var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_frame_event");
+//        mc.addEventListener(starlingswf.SwfEvent.SWF_FRAME, this.frameEventOut, this);
+//        this.addChild(mc);
+
         var mc:starlingswf.SwfMovieClip = this.swf.createMovie("mc_frame_event");
         mc.addEventListener(starlingswf.SwfEvent.SWF_FRAME, this.frameEventOut, this);
         this.addChild(mc);
+        mc.y = 100;
+        mc.rewind = true;
     }
 
     private frameEventOut(e:starlingswf.SwfEvent):void {

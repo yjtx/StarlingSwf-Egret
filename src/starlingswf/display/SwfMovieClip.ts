@@ -34,7 +34,8 @@ module starlingswf{
             this._endFrame = this._frames.length - 1;
             this._ownerSwf = ownerSwf;
 
-            this.setCurrentFrame(0);
+            this._currentFrame = -999;
+//            this.setCurrentFrame(0);
             this.play();
 
         }
@@ -46,6 +47,7 @@ module starlingswf{
          */
         public set rewind(value:boolean) {
             this._isRewind = value;
+//            this.setCurrentFrame(this._isRewind ? this._endFrame : this._startFrame);
         }
 
         /**
@@ -66,6 +68,9 @@ module starlingswf{
         }
 
         public update():void {
+            if (this._currentFrame == -999) {
+                this._currentFrame = this._isRewind ? this._endFrame : this._startFrame;
+            }
             if (!this._isPlay) return;
 
             if (this._isRewind) {//倒播
@@ -81,6 +86,7 @@ module starlingswf{
                     if(isReturn) return;
 
                     this.setCurrentFrame(this._endFrame);
+                    this._currentFrame -= 1;
                 }else{
                     this.setCurrentFrame(this._currentFrame);
                     this._currentFrame -= 1;
@@ -99,11 +105,13 @@ module starlingswf{
                     if(isReturn) return;
 
                     this.setCurrentFrame(this._startFrame);
+                    this._currentFrame += 1;
                 }else{
                     this.setCurrentFrame(this._currentFrame);
                     this._currentFrame += 1;
                 }
             }
+
         }
 
         private __frameInfos:any[];
@@ -173,10 +181,18 @@ module starlingswf{
                 display._parent = this;
             }
 
-            if(this._frameEvents != null && this._frameEvents[this._currentFrame] != null){
-                this.dispatchEventWith(this._frameEvents[this._currentFrame]);
+//            if(this._frameEvents != null && this._frameEvents[this._currentFrame] != null){
+//                this.dispatchEventWith(this._frameEvents[this._currentFrame]);
+//            }
+
+            if (this._frameEvents != null && this._frameEvents[this._currentFrame] != null) {
+                var str:string = (this._frameEvents[this._currentFrame]);
+                var events:Array<string> = (str.substr(1)).split("@");
+
+                this.dispatchEvent(new SwfEvent(SwfEvent.SWF_FRAME, false, false, events));
             }
 
+            console.log("_currentFrame = " + this._currentFrame)
         }
 
         public getCurrentFrame():number{
