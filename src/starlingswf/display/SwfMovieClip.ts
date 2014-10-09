@@ -191,8 +191,6 @@ module starlingswf{
 
                 this.dispatchEvent(new SwfEvent(SwfEvent.SWF_FRAME, false, false, events));
             }
-
-            console.log("_currentFrame = " + this._currentFrame)
         }
 
         public getCurrentFrame():number{
