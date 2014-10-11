@@ -34,7 +34,6 @@ module starlingswf{
             this._endFrame = this._frames.length - 1;
             this._ownerSwf = ownerSwf;
 
-            this._currentFrame = -999;
             this.setCurrentFrame(0, false);
             this.play();
 
